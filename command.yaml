@@ -1,0 +1,11 @@
+- name: using command module 
+  hosts: all
+  become: yes
+  tasks:
+    - name: using the cmd
+      ansible.builtin.command:
+        cmd: mkdir -p /home/stack/srikarreddyc
+      register: a
+      tags: web
+    - debug:
+        var: a
