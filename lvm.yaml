@@ -1,0 +1,48 @@
+- name: logical volume management
+  hosts: sys2
+  become: yes
+  tasks:
+    - name: Create a new primary partition sdb1 for LVM
+      community.general.parted:
+        device: /dev/sdb
+        number: 1
+        flags: [ lvm ]
+        state: present
+        fs_type: ext4
+    - name: Create a new primary 2 partition sdb2 for LVM
+      community.general.parted:
+        device: /dev/sdb
+        number: 2
+        flags: [ lvm ]
+        state: present
+        fs_type: ext4
+    - name: Creating a volume group newvg
+      community.general.lvg:
+        vg: newvg
+        pvs: /dev/sdb1
+        pesize: 8
+    - name: Create a logical volume the size of all remaining space in the volume group
+      community.general.lvol:
+        vg: newvg
+        lv: newlv
+        size: 100%FREE
+      tags: new
+    - name: Create a ext2 filesystem on /dev/sdb1
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/newvg/newlv
+    - name: Mount
+      ansible.posix.mount:
+        path: /mnt/newmount
+        src: /dev/newvg/newlv
+        fstype: ext4
+        state: present
+    - name: Create another volume group
+      community.general.lvg:
+        vg: newvg2
+        pvs: /dev/sdb2
+    - name: extend lv by adding vg
+      community.general.lvol:
+        vg: newvg2
+        lv: newlv
+        size: 10g
