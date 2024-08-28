@@ -1,0 +1,13 @@
+- name: creating new files and writing a content into it
+  hosts: all
+  become: yes
+  tasks:
+    - name: create a ganesh file
+      ansible.builtin.file:
+        path: /home/stack/ganesh.txt
+        state: touch
+    - name: writing into file
+      copy:
+        dest: /home/stack/ganesh.txt
+        content: |
+                 My name is ganesh
