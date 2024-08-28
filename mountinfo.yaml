@@ -1,0 +1,12 @@
+- name: creating a file that contains info about mounts
+  hosts: all
+  become: yes
+  tasks:
+    - name: Gather facts
+      ansible.builtin.setup:
+        gather_subset:
+          - mounts
+    - name: use template to write into a file
+      ansible.builtin.template:
+        src: /home/stack/ansible/fs.j2
+        dest: /mnt/mountinfo.txt
