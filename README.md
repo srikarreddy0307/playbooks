@@ -21,6 +21,7 @@ task control:
 5. register: used to store output of result into a variable
 6. ignore_errors: allows to run next task even if it encounters an error
 7. block-rescue: its like a if else statement and always will be always excecuted
+   
    ------------------------------------------------------
 ad-hoc commands 
 ansible all -m ping is to check ping status of all servers
