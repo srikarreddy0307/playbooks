@@ -1,0 +1,60 @@
+---
+- name: NFS 
+  hosts: sys1
+  become: yes
+  tasks:
+    - name: Install NFS 
+      yum:
+        name:"{{item}}"
+        state: present
+      loop:
+        - nfs-utils
+        - rpcbind
+
+    - name: create a export directory
+      file:
+        path: /share
+        state: directory
+        mode: '0755'
+
+    - name: write into /etc/exports
+      lineinfile:
+        path: /etc/exports
+        line: "/share *(rw,sync,no_root_squash)"
+        create: yes
+
+    - name: Start and enable rpcbind
+      service:
+        name: rpcbind
+        state: started
+        enabled: yes
+
+    - name: Start and enable NFS server
+      service:
+        name: nfs-server
+        state: started
+        enabled: yes
+
+    - name: Export NFS shares
+      command: exportfs -rv
+
+- name:  NFS Client
+  hosts: sys2
+  become: yes
+  tasks:
+    - name: Install NFS client packages
+      yum:
+        name: nfs-utils
+        state: present
+
+    - name: Create mount point
+      file:
+        path: /mnt/nfs/share
+        state: directory
+
+    - name: Mount NFS share
+      mount:
+        path: /mnt/nfs/share
+        src: "192.168.29.229:/share"
+        fstype: nfs
+        state: mounted
