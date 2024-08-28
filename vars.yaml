@@ -1,0 +1,13 @@
+- name: Testing the variables priority
+  hosts: sys2
+  become: yes
+  vars:
+    pkg: httpd
+  vars_files:
+    - myvars.yml
+  tasks:
+    - name: installing a package
+      ansible.builtin.yum:
+        name: "{{pkg}}"
+        state: latest
+#this playbook is to test the priority of variables whether first it take variable from vars or vars_files
