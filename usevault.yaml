@@ -1,0 +1,12 @@
+---
+- name: Create a user with a password from Ansible Vault
+  hosts: all
+  become: yes
+  vars_files:
+    - secret.yaml  
+  tasks:
+    - name: Create a user1 user
+      user:
+        name: user1
+        password: "{{ userpwd | password_hash('sha512') }}"
+        state: present
