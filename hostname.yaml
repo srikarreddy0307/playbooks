@@ -1,0 +1,7 @@
+- name: changing the hostname 
+  hosts: sys2
+  become: yes
+  tasks:
+    - name: Set a hostname 
+      ansible.builtin.hostname:
+        name: sys21
