@@ -1,0 +1,44 @@
+- name: REAR BACKUP
+  hosts: sys2
+  become: yes
+  vars_prompt:
+    - name: "nfs_ip"
+      prompt: " enter nfs ip address"
+      private: no
+    - name: "nfs_mount_point"
+      prompt: "enter nfs mount point"
+      private: no
+  tasks:
+    - name: install rear package
+      yum:
+        name: rear
+        state: latest
+    - name: ensure nfs utils are installed
+      yum:
+        name: nfs-utils
+        state: present
+    - name: create rear config directory
+      file:
+        path: /etc/rear/local.conf
+        state: touch
+    - name: configure rear for nfs backup
+      blockinfile:
+        path: /etc/rear/local.conf
+        create: yes
+        block: |
+               BACKUP=NETFS
+               BACKUP_URL=nfs://{{nfs_ip}}{{nfs_mount_point}}
+               OUTPUT=ISO
+               OUTPUT_URL=nfs://{{nfs_ip}}{{nfs_mount_point}}
+    - name: perform rear backup
+      command: rear -v mkbackup
+      register: rear_result
+      ignore_errors: yes
+    - name: checking if rearbackup sucessful
+      debug:
+        msg: " sucess"
+      when: rear_result.rc == 0
+    - name: failure check
+      debug:
+        msg: "failed"
+      when: rear_result.rc!=0
