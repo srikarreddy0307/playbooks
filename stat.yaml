@@ -1,0 +1,16 @@
+- name: checking if file exist or not
+  hosts: all
+  become: yes
+  tasks:
+    - name: using stat module to check file existence
+      stat:
+        path: /etc/httpd/conf/httpd.conf
+      register: f
+    - name: display if file exists
+      debug:
+        msg: file exists
+      when: f.stat.exists == true
+    - name: display if file not exists
+      debug:
+        msg: file NOT exists
+      when: f.stat.exists == false
