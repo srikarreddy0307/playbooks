@@ -1,0 +1,11 @@
+- name: using the facts and writing ip info into a file
+  hosts: sys2
+  become: yes
+  tasks:
+    - name: writing info into a file
+      copy:
+        dest: /home/stack/srikar.txt
+        content: |
+                 "{{ansible_all_ipv4_addresses}}"
+                 "{{ansible_architecture}}"
+                 "{{ansible_default_ipv4.address}}"
