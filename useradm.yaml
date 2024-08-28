@@ -1,0 +1,31 @@
+- name: User Administration
+  hosts: all
+  become: yes
+  tasks:
+    - name: Adding Groups
+      ansible.builtin.group:
+        name: "{{item}}"
+        state: present
+      loop:
+        - prod
+        - testing
+        - engg
+    - name: Adding rob user to prod group
+      ansible.builtin.user:
+        name: rob
+        shell: /bin/bash
+        groups: prod
+        append: yes
+
+    - name: Adding saara user to testing group with uid 3001 
+      ansible.builtin.user:
+        name: sarah
+        shell: /bin/bash
+        groups: testing
+        uid: 3001
+        append: yes
+    - name: Adding smith user to primary group of engg and comment smith
+      ansible.builtin.user:
+        name: smith
+        comment: smith
+        group: engg
