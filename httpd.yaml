@@ -1,0 +1,29 @@
+- name: apache web server
+  hosts: all
+  become: yes
+  tasks:
+    - name: installing httpd package
+      yum:
+        name: httpd
+        state: latest
+    - name: starting httpd service
+      service:
+        name: httpd
+        state: started
+    - name: writing content into index.html
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+                 HI THIS IS SRIKAR
+        notify: restarting service
+    - name: enable firewall for http
+      ansible.posix.firewalld:
+        service: http
+        permanent: true
+        state: enabled
+handlers:    
+    - name: restarting service
+      service:
+        name: http
+        state: restarted
+    
