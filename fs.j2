@@ -1,0 +1,5 @@
+{% for mount in ansible_mounts %}
+ Device: {{mount.device}}
+ Mountpoint: {{mount.mount}}
+ FSype: {{mount.fstype}}
+{% endfor %}
