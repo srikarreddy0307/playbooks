@@ -1,0 +1,56 @@
+- name: creating a lvm by checking if it exists or not
+  hosts: sys2
+  become: yes
+  vars:
+    vg_name: newvg1
+    lv_name: newlv1
+    lv_size: 4G
+    mount: /mnt/saisrikarmount
+  tasks:
+    - name: check if vg exists
+      command: "vgdisplay {{vg_name}}"
+      register: vg_status
+      ignore_errors: yes
+
+    - name: check if lv exists
+      command: "lvdisplay {{vg_name}}/{{lv_name}}"
+      when: vg_exists.rc==0
+      register: lv_status
+      ignore_errors: yes
+    - name: creating a partition
+      parted:
+        device: /dev/sdc
+        number: 1
+        state: present
+        fs_type: xfs
+      when: vg_status.rc!=0
+
+    - name: creating a vg
+      lvg:
+         vg: "{{vg_name}}"
+         pvs: /dev/sdc1
+      when: vg_status.rc!=0
+    - name: creating a lv
+      lvol:
+         vg: "{{vg_name}}"
+         lv: "{{lv_name}}"
+         size: "{{lv_size}}"
+      when: lv_status!=0
+    - name: formatting
+      filesystem:
+        fstype: xfs
+        dev: "/dev/{{vg_name}}/{{lv_name}}"
+      tags: filesys
+    - name: creating a mount point
+      file:
+        path: "{{mount}}"
+        state: directory
+        mode: '0755'
+      tags: mount
+    - name: mounting
+      mount:
+        path: "{{mount}}"
+        src: "/dev/{{vg_name}}/{{lv_name}}"
+        fstype: xfs
+        state: present
+      tags: mount
